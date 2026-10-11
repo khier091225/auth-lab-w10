@@ -1,11 +1,11 @@
 <?php
- 
+
 namespace Database\Seeders;
- 
+
 use App\Models\Course;
 use App\Models\User;
 use Illuminate\Database\Seeder;
- 
+
 class DatabaseSeeder extends Seeder
 {
     public function run(): void
@@ -27,12 +27,12 @@ class DatabaseSeeder extends Seeder
             'name' => 'Carla Student', 'email' => 'carla@example.com',
             'role' => 'student',
         ]);
- 
+
         // Ana owns 3 courses (one inactive); Ben owns 3
         $anaCourses = Course::factory(2)->for($ana, 'owner')->create();
         Course::factory()->inactive()->for($ana, 'owner')->create();
         Course::factory(3)->for($ben, 'owner')->create();
- 
+
         // Carla is enrolled in Ana's first course, so that course cannot be deleted
         $anaCourses->first()->students()->attach($carla);
     }
