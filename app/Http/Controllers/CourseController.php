@@ -1,65 +1,59 @@
 <?php
-
+ 
 namespace App\Http\Controllers;
-
+ 
+use App\Http\Requests\CourseRequest;
 use App\Models\Course;
-use Illuminate\Http\Request;
-
+ 
 class CourseController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        //
+        $courses = Course::with('owner')->orderBy('code')->get();
+ 
+        return view('courses.index', compact('courses'));
     }
-
-    /**
-     * Show the form for creating a new resource.
-     */
+ 
     public function create()
     {
-        //
+        $course = new Course(['units' => 3, 'is_active' => true]);
+ 
+        return view('courses.form', compact('course'));
     }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
+ 
+    public function store(CourseRequest $request)
     {
-        //
+        // The owner comes from the logged-in user, NEVER from the form
+        $course = $request->user()->courses()->create($request->validated());
+ 
+        return redirect()->route('courses.show', $course)
+            ->with('status', 'Course created.');
     }
-
-    /**
-     * Display the specified resource.
-     */
+ 
     public function show(Course $course)
     {
-        //
+        $course->load('owner')->loadCount('students');
+ 
+        return view('courses.show', compact('course'));
     }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
+ 
     public function edit(Course $course)
     {
-        //
+        return view('courses.form', compact('course'));
     }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Course $course)
+ 
+    public function update(CourseRequest $request, Course $course)
     {
-        //
+        $course->update($request->validated());
+ 
+        return redirect()->route('courses.show', $course)
+            ->with('status', 'Course updated.');
     }
-
-    /**
-     * Remove the specified resource from storage.
-     */
+ 
     public function destroy(Course $course)
     {
-        //
+        $course->delete();
+ 
+        return redirect()->route('courses.index')->with('status', 'Course deleted.');
     }
 }
